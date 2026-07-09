@@ -6,6 +6,9 @@
 
 **Web article → Knowledge Base.** Read → Summarize → Save. Auto-classify, multi-language, token-efficient.
 
+**✅ 轻松读取微信公众号文章（mp.weixin.qq.com），转成纯文字 Markdown 存档。**
+**✅ Effortlessly reads WeChat public account articles (mp.weixin.qq.com), saves as text-only Markdown.**
+
 任意网页文章（公众号/知乎/头条/博客/新闻）→ 转 Markdown → 自动分类 → 存到结构化知识库。纯文字存档，省 token。
 
 ---
