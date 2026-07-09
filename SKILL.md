@@ -107,9 +107,9 @@ web_extract(urls=["https://..."], char_limit=10000)
 - ⚠️ 当前环境 web_extract backend 为 DuckDuckGo（搜索only），可能直读失败
 - 失败就走方案 2
 
-#### 方案 2：Camofox 浏览器（处理反爬）
+#### 方案 2：Camofox 浏览器
 
-适用于公众号/知乎等反爬严格的网站。通过真实浏览器指纹绕过检测。
+适用于公众号等需要浏览器技术支持才能读取的网站。
 
 ```bash
 # 检查 Camofox 是否运行
@@ -131,7 +131,7 @@ browser_navigate(url="https://mp.weixin.qq.com/s/...")
 **当前实测效果：**
 | 网站类型 | 结果 | 说明 |
 |:---------|:-----|:------|
-| ✅ 反爬但无需登录（如公众号） | 可读取 | Camofox 浏览器绕过 |
+| ✅ 需要浏览器技术（如公众号） | 可读取 | Camofox 浏览器支持 |
 | ✅ 国际开放站（The Verge等） | 可读取 | web_extract 直读 |
 | ❌ 必须登录的站点 | 提示用户登录 | 用户登录后，浏览器会话保留 cookie，后续可读取 |
 
@@ -311,7 +311,7 @@ INDEX.md 格式：
 ## 注意事项
 
 - **纯文字存档**：知识库只存文章的文字/纯文本内容，不包含图片、视频、排版样式。原文链接保留在 frontmatter 中，需要看图时点开原链接即可
-- 优先用 web_extract（无需浏览器，最省 token），反爬页面 fallback 到 browser
+- 优先用 web_extract（无需浏览器，最省 token），复杂页面 fallback 到 browser
 - 同一篇文章不要重复保存（检查 INDEX.md 中 URL 是否已存在）
 - 文章 title 过长时，文件名截取前30个字即可
 - 保存前询问用户是否需要分析内容，还是只存档
