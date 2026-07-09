@@ -4,7 +4,7 @@
 
 **web-to-kb** (Web → Knowledge Base) is a universal skill that reads any web article, converts it to Markdown, saves it to a structured knowledge base, and auto-classifies it by topic.
 
-**✅ Effortlessly reads WeChat public account articles (mp.weixin.qq.com)** — anti-scraping handled automatically, just send the link.
+**✅ Effortlessly reads articles from any site — WeChat/Zhihu/Toutiao/Blog/News, just send the link.**
 
 ## Use Cases
 
