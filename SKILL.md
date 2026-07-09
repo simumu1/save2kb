@@ -1,318 +1,83 @@
 ---
-name: web-to-kb
-description: 网页文章→结构化知识库。读取→转MD→自动分类→存档。支持中英文。Web articles → structured KB. Read→MD→classify→save. EN/CN.
+name: save2kb
+description: >
+  Save web articles to a structured local knowledge base. Reads any public article
+  (WeChat, Zhihu, Toutiao, blogs, news), converts to Markdown, auto-tags by topic,
+  archives to disk. After reading, summarizes key points and offers to save with
+  proper categorization. Use when user sends a URL/link, mentions saving articles,
+  wants to build a knowledge base, or asks about organizing web content.
+license: MIT
+compatibility: Designed for Hermes Agent
+metadata:
+  author: simumu1
+  repo: https://github.com/simumu1/save2kb
+  languages: zh, en
 ---
 
-# web-to-kb / 网页文章 → 知识库
+# save2kb — Web Article → Knowledge Base
 
-**🌐 Languages / 语言**
-- [中文说明书](references/README.zh-CN.md)
-- [English Docs](references/README.en.md)
+> **Bilingual:** When user speaks Chinese, reply in Chinese; English ↔ English.
+> **Trigger:** User sends any article URL.
 
-**📦 Public repo:** https://github.com/simumu1/save2kb
+Save web articles to a local knowledge base as structured Markdown files.
 
-> This skill works in any language environment. When the user speaks Chinese, use the Chinese workflow below. For English users, the logic is identical — just respond in English.
-> 本技能适配任何语言的操作系统和用户。用户说中文就走中文流程，说英文就走英文流程，逻辑完全一致。
->
-> ✅ **轻松读取各网站文章 — 公众号/知乎/头条/博客/新闻，你只管发链接。**
-> ✅ **Effortlessly reads articles from any site — WeChat/Zhihu/Toutiao/Blog/News, just send the link.**
-
-## 触发条件
-
-用户发送任意网站文章链接时使用。
-
-**两种模式：**
-
-| 用户说 | 流程 |
-|:-------|:-----|
-| 发链接 + "知识库"/"存知识库"/"收入知识库" | 读→汇报→**自动存档**（只问路径，不问要不要） |
-| 光发链接，没提"知识库" | 读→汇报→**问"要存知识库吗？"** |
-
-## 完整操作流程
+## Quick workflow
 
 ```
-用户发链接
+User sends URL
     ↓
-① 读取文章（先试 web_extract，不行自动启 Camofox→browser_navigate）
+① Read article — web_extract → Camofox browser → search reposts → paid API
     ↓
-② 汇报分析结果（文章要点、核心观点）
+② Report summary (key points, source, date)
     ↓
-③ 判断：用户说了"知识库"吗？
-    ├─ ✅ 说了 → 自动进存档流程：
-    │           ├─ 已有路径记录 → 直接存档
-    │           └─ 新用户 → 问"有现成知识库还是帮你建一个？" → 存档
-    │
-    └─ ❌ 没说 → 询问："要存知识库吗？"
-                ├─ "好/存" → 同上存档流程
-                └─ "不用/算了" → 结束
+③ Offer to save? (auto-save if user said "知识库"/"save to KB")
+    ├─ Yes → determine KB path → format as MD → archive
+    └─ No  → done
 ```
 
-## 知识库路径判断
+## Reading priority (token-saving)
 
-**收到"存知识库"指令后，先问用户：**
+| Priority | Method | When |
+|:---------|:-------|:-----|
+| 1st | `web_extract(urls=[...], char_limit=10000)` | Open sites |
+| 2nd | Camofox → `browser_navigate` | Anti-scrape sites (WeChat, Zhihu) |
+| 3rd | `web_search` for reposted versions | When browser also fails |
+| 4th | dajiala.com paid API (¥0.03/article) | Last resort |
 
-> *"你有现成的知识库吗？还是用默认的 `~/知识库/`？"*
+## KB path logic
 
-- 用户说**"有"（现成的知识库）** → 追问路径（例如 `~/Documents/Obsidian Vault`、`D:\知识库` 等）
-- 用户说**"没有"** → **再问是否要建立知识库：**
-  > *"我可以帮你建一个，结构是这样的：原始文章/ + 主题归类/ + 系列总结/，要建吗？"*
-  - 用户说**"好"、"建"** → 创建默认知识库 `~/知识库/` 并初始化 INDEX.md
-  - 用户说**"不用"、"算了"** → 只读+分析汇报，不存档
-- 如果用户之前确认过路径且没换 → 直接复用，不再重复问（存到 memory）
+- First time: ask user for path or offer `~/知识库/` default
+- Repeat: reuse previous path (persist in memory)
+- Respect user's existing directory structure
 
-## 分类规则
+## Save format
 
-**默认由你根据文章内容自动判断标签，不问用户。** 除非用户主动说"这个归到XX类"。
-
-分类依据：
-- 文章标题和关键词判断主题
-- 匹配现有标签体系（A股/量化/AI/宏观/行业/科技/财经/SEO/其他）
-- 如果内容涉及多个主题，选最核心的1-2个标签
-- 如果内容明显不属于现有标签，可以新建合适标签
-
-## 知识库结构
-
-默认结构（`~/知识库/`）：
-
-```
-~/知识库/
-├── INDEX.md              ← 主索引（所有文章目录，按时间倒排）
-├── 原始文章/              ← 文章原文MD，按日期命名
-│   ├── 2026-07-09-标题.md
-│   └── ...
-├── 主题归类/              ← 按主题分类的提炼笔记
-│   ├── A股-市场分析.md
-│   ├── AI-大模型.md
-│   ├── 量化-策略.md
-│   └── ...
-└── 系列总结/              ← 周期性的分类汇总
-    └── 2026-07-第2周-知识库周报.md
-```
-
-**如果用户有自己的知识库**，适配他的目录结构，不要把文件乱放。先看他知识库的目录规划，把文章放到最合适的分类下。
-
-## 文章读取 & 保存流程
-
-### Step 1: 读取文章（省 token）
-
-按优先级尝试以下方案。每个方案失败后自动降级到下一个。
-
-#### 方案 1：web_extract（最快最省，无浏览器开销）
-
-```
-web_extract(urls=["https://..."], char_limit=10000)
-```
-
-- 设 char_limit=10000 控制 token 消耗
-- ⚠️ 当前环境 web_extract backend 为 DuckDuckGo（搜索only），可能直读失败
-- 失败就走方案 2
-
-#### 方案 2：Camofox 浏览器
-
-适用于公众号等需要浏览器技术支持才能读取的网站。
-
-```bash
-# 检查 Camofox 是否运行
-curl -s -o /dev/null -w "%{http_code}" http://localhost:9377/
-
-# 如果未运行，启动
-terminal(background=true, command="cd ~/camofox-tmp && npm start")
-sleep 8
-```
-
-然后用 browser_navigate 读取：
-
-```
-browser_navigate(url="https://mp.weixin.qq.com/s/...")
-```
-
-返回 compact snapshot，已是最省 token 模式。只保留页面文字和交互元素。
-
-**当前实测效果：**
-| 网站类型 | 结果 | 说明 |
-|:---------|:-----|:------|
-| ✅ 需要浏览器技术（如公众号） | 可读取 | Camofox 浏览器支持 |
-| ✅ 国际开放站（The Verge等） | 可读取 | web_extract 直读 |
-| ❌ 必须登录的站点 | 提示用户登录 | 用户登录后，浏览器会话保留 cookie，后续可读取 |
-
-#### 方案 3：搜索转载内容
-
-当浏览器也失败时，用文章标题搜索转载：
-
-```
-web_search(query='"文章原标题" 转载')
-```
-
-优先检查以下转载平台（它们常全文转载）：
-- `tahou.com` — 长文转载，较干净
-- CSDN、51CTO — 技术文章转载
-- 百家号 — 百度生态
-- GitHub README（如果是开源工具文章）
-
-#### 方案 4：付费 API（终极方案）
-
-如果以上方案全部失败，可使用 dajiala.com（极致了数据）API：
-```
-curl -s -X GET 'https://www.dajiala.com/fbmain/monitor/v3/article_detail?url=<URL>&key=<API_KEY>'
-```
-费用：¥0.03/次（约 3 分钱一篇文章）
-
-#### ⚠️ 坑：browser_navigate 依赖 Camofox
-
-Hermes 的 browser 工具现在通过 Camofox 代理。如果 Camofox 没启动，会报错：
-> Cannot connect to Camofox at http://localhost:9377
-
-**启动方法：**
-```bash
-terminal(command="cd ~/camofox-tmp && npm start", background=true)
-# 等几秒后检查
-terminal(command="curl -s http://localhost:9377/")  # 200 即成功
-```
-启动后保持后台运行，多次 browser 调用复用同一个实例。
-
-### Step 2: 提取关键信息
-
-从返回内容中提取：
-- **标题**
-- **发布日期**（从文章正文找，找不到用当天）
-- **来源网站/作者**
-- **文章摘要**（前200字）
-- **核心主题标签**（分析内容后自动判断）
-- **原文链接**
-
-### Step 3: 保存为标准化 MD 文件
-
-文件路径：`~/知识库/原始文章/YYYY-MM-DD-简短标题.md`
-
-YAML frontmatter 格式：
+Each article → `~/知识库/原始文章/YYYY-MM-DD-short-title.md` with YAML frontmatter:
 
 ```yaml
 ---
-title: "文章原标题"
-source: "来源网站/公众号名称"
-url: "原文链接"
+title: "Original Title"
+source: "Site/Author"
+url: "https://..."
 date: 2026-07-09
-tags: [标签1, 标签2]
-summary: "文章摘要（200字以内）"
+tags: [topic1, topic2]
+summary: "≤200 chars"
 status: raw
 ---
 ```
 
-正文内容 = 文章原文（从 web_extract / browser snapshot 提取的纯文本）。
+Then update `INDEX.md`, add to topic folder, set `status: classified` after weekly cron digest.
 
-### Step 4: 更新 INDEX.md
+## Tags
 
-INDEX.md 格式：
+Auto-detect: `A股`, `量化`, `AI`, `宏观`, `行业`, `科技`, `财经`, `SEO`, `其他`. Don't ask.
 
-```markdown
-# 📚 知识库索引
+## Cron suggestion
 
-## 原始文章（按时间倒排）
+Weekly cron: scan `status: raw` articles → group by tag → generate weekly digest → mark `classified`.
 
-| 日期 | 标题 | 来源 | 标签 | 状态 |
-|:----:|:----|:----|:----|:----:|
-| 2026-07-09 | [标题](原始文章/2026-07-09-标题.md) | 来源名 | `标签` | raw |
+---
 
-## 主题分类
-
-- [A股-市场分析](主题归类/A股-市场分析.md)
-- [AI-大模型](主题归类/AI-大模型.md)
-- ...
-
-## 系列总结
-
-- [2026-07-第2周-知识库周报](系列总结/2026-07-第2周-知识库周报.md)
-```
-
-每次新增文章：
-1. 追加一行到「原始文章」表格
-2. 如果文章主题对应已有主题分类页，在那页追加链接
-3. 如果文章主题是新的，创建新的主题分类页
-
-### Step 5: 更新主题归类
-
-`主题归类/` 下的每个文件是一篇按主题汇总的笔记，格式：
-
-```markdown
-# 主题：A股-市场分析
-
-## 相关文章
-
-| 日期 | 文章 | 核心观点 |
-|:----:|:----|:--------|
-| 2026-07-09 | [标题](../原始文章/...) | 核心观点摘要 |
-
-## 关键洞察
-
-（随时间积累，这里会形成对某个主题的深层理解）
-```
-
-## 分类标签体系
-
-默认标签（按内容自动判断，可扩展）：
-
-| 标签 | 说明 |
-|:----|:-----|
-| `A股` | A股市场、政策、个股分析 |
-| `量化` | 量化策略、回测、指标 |
-| `AI` | AI行业、大模型、AI应用 |
-| `宏观` | 宏观经济、货币政策、国际局势 |
-| `行业` | 特定行业分析 |
-| `科技` | 科技公司、技术趋势 |
-| `财经` | 泛财经、投资理财 |
-| `SEO` | 搜索引擎优化 |
-| `其他` | 不属以上类别 |
-
-## 定期归类总结（可设 cron）
-
-建议每周/每10篇文章跑一次，做三件事：
-
-### 1. 扫描新文章
-读取 `原始文章/` 中 `status: raw` 的文章。
-
-### 2. 按主题聚类
-将 raw 文章按标签分组，每组写出归类摘要追加到对应 `主题归类/` 文件。
-
-### 3. 生成系列总结
-在 `系列总结/` 下写一份周报，格式：
-
-```markdown
-# 📖 知识库周报 — 2026年7月第2周
-
-## 本周新增（N篇）
-
-| 文章 | 来源 | 主题 | 要点 |
-|:----|:----|:----|:-----|
-| [标题] | 来源 | A股 | ... |
-
-## 各主题趋势
-
-### A股-市场分析（X篇）
-本周A股相关文章核心观点：...
-
-### AI-大模型（Y篇）
-本周AI相关文章核心观点：...
-
-## 📌 值得关注的观点
-
-（摘录每篇文章最有价值的一句话或数据）
-```
-
-### 4. 标记已处理
-写完周报后，将已归类文章的 frontmatter 中 `status: raw` 改为 `status: classified`。
-
-## 使用示例
-
-- 用户发来任意链接 → 自动执行 Step 1~5 → 回复文章要点摘要 + 告知已存入知识库
-- 用户说"这周知识库有什么" → 读取最新的系列总结
-- 用户说"帮我整理知识库" → 执行定期归类总结流程
-- 用户说"把某篇文章提炼成主题笔记" → 读取原文 → 写主题归类页
-
-## 注意事项
-
-- **纯文字存档**：知识库只存文章的文字/纯文本内容，不包含图片、视频、排版样式。原文链接保留在 frontmatter 中，需要看图时点开原链接即可
-- 优先用 web_extract（无需浏览器，最省 token），复杂页面 fallback 到 browser
-- 同一篇文章不要重复保存（检查 INDEX.md 中 URL 是否已存在）
-- 文章 title 过长时，文件名截取前30个字即可
-- 保存前询问用户是否需要分析内容，还是只存档
-- 定期归类总结建议设 cron 每周一次
+**Full docs:**
+- [中文说明书](references/README.zh-CN.md)
+- [English Docs](references/README.en.md)
