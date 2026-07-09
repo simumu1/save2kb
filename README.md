@@ -144,6 +144,26 @@ status: raw
 - **Camofox Browser** (optional) — for anti-scrape pages like WeChat. Auto-starts on `localhost:9377`
 - **web_extract** — built-in agent tool, preferred for token efficiency
 
+## 🙏 Acknowledgments / 致谢
+
+本技能站在众多优秀开源项目和开发者的肩膀上，做了整合与优化。核心思路是保持简洁、省 token、省时间。如有改进建议，欢迎留言或提 Issue。
+
+> This skill is built upon the work of many outstanding open-source projects and developers. Our role is integration and optimization. The core philosophy: simplicity, token efficiency, time saving. Feedback and suggestions are welcome.
+
+**致谢名单 / Special Thanks to：**
+
+| 项目 / 开发者 | 贡献 |
+|:--------------|:-----|
+| [Nous Research](https://nousresearch.com) | Hermes Agent — 智能体框架 / the agent framework |
+| [jo-inc / Camofox Browser](https://github.com/jo-inc/camofox-browser) | 反检测浏览器，实现公众号文章读取 / anti-detection browser for WeChat |
+| [kepano / obsidian-skills](https://github.com/kepano/obsidian-skills) | 技能结构参考 / skill structure reference |
+| [obra / superpowers](https://github.com/obra/superpowers) | AI 编程技能框架 / AI coding skill framework (233k ⭐) |
+| [jnMetaCode / superpowers-zh](https://github.com/jnMetaCode/superpowers-zh) | 中文技能文档范例 / Chinese skill documentation example |
+| [anysearch-ai / anysearch-skill](https://github.com/anysearch-ai/anysearch-skill) | 公开技能 README 规范参考 / public skill README template |
+| [极致了数据 dajiala.com](https://www.dajiala.com) | 微信公众号文章 API（备选方案）/ WeChat article API (fallback) |
+
+以及所有开源社区的贡献者。感谢你们的无私分享 🙌
+
 ## 📜 License
 
 MIT
