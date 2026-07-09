@@ -6,6 +6,18 @@
 
 **✅ Effortlessly reads articles from any site — WeChat/Zhihu/Toutiao/Blog/News, just send the link.**
 
+## 💰 Token Savings (Real Measured Data)
+
+Using one WeChat article as a benchmark:
+
+| Method | Data Size | Est. Tokens | Ratio |
+|:-------|:----------|:------------|:-----:|
+| 🔴 Raw full-page HTML (JS/CSS/tracking) | 4,055,779 chars | Millions | 1,429x |
+| 🟢 **save2kb: compact snapshot → plain MD** | **2,838 chars** | **~2,000-4,000** | **1x** |
+
+**Source:** Same WeChat article, comparing `outerHTML.length` vs `innerText.length`.
+**Result:** Saves approximately **99.93% of tokens**.
+
 ## Use Cases
 
 - User sends a WeChat/Zhihu/Medium/blog/news article link and says "save to knowledge base"
