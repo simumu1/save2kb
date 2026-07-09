@@ -1,86 +1,108 @@
 # save2kb 📥→📚
 
-**Web article → Knowledge Base. Read → Summarize → Save. Auto-classify, multi-language.**
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/simumu1/save2kb?style=social)](https://github.com/simumu1/save2kb)
+[![Hermes Agent](https://img.shields.io/badge/Hermes%20Agent-ready-8B5CFE)](https://hermes-agent.nousresearch.com)
 
-把任意网页文章（公众号/知乎/头条/博客/新闻）转成 Markdown，自动分类存到结构化知识库。
+**Web article → Knowledge Base.** Read → Summarize → Save. Auto-classify, multi-language, token-efficient.
 
----
-
-## What is this? / 这是什么？
-
-An **AI Agent skill** for [Hermes Agent](https://hermes-agent.nousresearch.com). When the user sends a web article link + says "save to knowledge base", the agent:
-
-- Reads the article (token-efficient)
-- Reports a summary back to the user
-- Converts it to Markdown (text only — no images)
-- Saves to a structured knowledge base with auto-classification
-- Supports periodic digests (weekly topic summaries)
+任意网页文章（公众号/知乎/头条/博客/新闻）→ 转 Markdown → 自动分类 → 存到结构化知识库。纯文字存档，省 token。
 
 ---
 
-## Quick Start / 快速使用
+## ✨ Features / 特性
 
-### For AI Agents / 给智能体
+| | |
+|---|---|
+| 🔄 **Auto-classify** | 自动判断文章主题标签（A股/量化/AI/宏观/SEO...） |
+| 🌐 **Multi-language** | 用户说中文就用中文，说英文就用英文 |
+| 💰 **Token-efficient** | 优先 web_extract，不行再启浏览器 |
+| 📝 **Text-only archive** | 只存文字，图片保留在原链接 |
+| 📂 **Flexible KB** | 支持现成知识库（Obsidian等），也可自动创建 |
+| 📊 **Weekly digest** | 可 cron 定时生成主题周报 |
 
-Load the skill and the agent will automatically handle any article link tagged with "knowledge base" / "知识库".
+## 📦 Install / 安装
 
-**Workflow:**
-1. User sends a URL + says "save to KB" / "存知识库"
-2. Agent reads the article
-3. Agent reports the analysis
-4. Agent asks: "Have a KB? Or create one?"
-5. Agent saves + classifies
+### Hermes Agent
 
-### For Humans / 给人看
+```bash
+# From marketplace
+/plugin marketplace add simumu1/save2kb
 
-This repo contains the skill definition file (`SKILL.md`) and documentation in multiple languages.
-
-```
-save2kb/
-├── SKILL.md                      ← Skill definition (bilingual: CN/EN)
-└── references/
-    ├── README.zh-CN.md           ← 中文说明书
-    └── README.en.md              ← English docs
+# Or manual: clone to skills directory
+git clone https://github.com/simumu1/save2kb.git ~/.hermes/skills/save2kb
 ```
 
----
+### Claude Code / Codex / OpenCode
 
-## Knowledge Base Structure / 知识库结构
+```bash
+# Generic: copy to agent skills dir
+git clone https://github.com/simumu1/save2kb.git ~/.agents/skills/save2kb
 
-Default path: `~/知识库/` (configurable)
+# Claude Code specific
+cp -r save2kb ~/.claude/skills/save2kb
+```
+
+### npx skills
+
+```bash
+npx skills add https://github.com/simumu1/save2kb
+```
+
+## 🚀 Usage / 使用
+
+### 场景 A：存知识库
+
+> **用户：** `https://mp.weixin.qq.com/s/... 存知识库`
+>
+> **智能体：** 读文章 → 汇报要点 → 问"有现成知识库还是帮你建一个？" → 按分类存档
+
+### 场景 B：只读不存
+
+> **用户：** `https://zhuanlan.zhihu.com/p/... 你看这个`
+>
+> **智能体：** 读文章 → 汇报要点 → 结束（不存档不询问）
+
+## 📁 Knowledge Base Structure / 知识库结构
 
 ```
 ~/知识库/
-├── INDEX.md              ← Master index
-├── 原始文章/              ← Raw articles (YYYY-MM-DD-title.md)
-├── 主题归类/              ← Topic-categorized notes
-└── 系列总结/              ← Weekly digests
+├── INDEX.md              ← 主索引（按时间倒排）
+├── 原始文章/              ← 纯文字 MD，YYYY-MM-DD-标题.md
+├── 主题归类/              ← 按主题聚合的笔记（A股/AI/SEO...）
+└── 系列总结/              ← 每周自动生成的周报
 ```
 
+每篇 MD 文件带 YAML frontmatter：
+
+```yaml
 ---
-
-## Key Features / 核心特性
-
-| Feature | Detail |
-|---------|--------|
-| 🔄 **Auto-classify** | Tags articles by content (A-shares/Quant/AI/Macro/SEO...) |
-| 🌐 **Multi-language** | Works in any language — responds in user's language |
-| 💰 **Token-efficient** | Prioritizes web_extract; falls back to browser only when needed |
-| 📝 **Text-only** | Saves text content only — images available via original URL |
-| 📂 **Flexible KB path** | Works with existing knowledge bases (Obsidian, custom paths) |
-| 📊 **Weekly digests** | Can auto-generate topic-summary reports |
-
+title: "文章标题"
+source: "来源网站"
+url: "原文链接"
+date: 2026-07-09
+tags: [A股, 宏观]
+summary: "文章摘要"
+status: raw
 ---
+```
 
-## Environment / 环境依赖
+## 🌐 Full Docs / 完整说明书
 
-- **Hermes Agent** (or compatible AI agent framework)
-- **Camofox Browser** (for anti-scrape pages like WeChat)
-  - Runs locally on `localhost:9377`
-  - Auto-started by the agent if not running
+| Language | File |
+|:---------|:-----|
+| 🇨🇳 中文 | [README.zh-CN.md](references/README.zh-CN.md) |
+| 🇬🇧 English | [README.en.md](references/README.en.md) |
 
----
+## 📄 Skill Definition
 
-## License
+[SKILL.md](SKILL.md) — the main skill file for AI agents to consume. Bilingual (CN/EN).
+
+## ⚙️ Dependencies / 依赖
+
+- **Camofox Browser** (optional) — for anti-scrape pages like WeChat. Auto-starts on `localhost:9377`
+- **web_extract** — built-in agent tool, preferred for token efficiency
+
+## 📜 License
 
 MIT
