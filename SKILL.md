@@ -2,7 +2,7 @@
 name: save2kb
 description: >
   Save web articles to a structured local knowledge base. Reads any public article
-  (WeChat, Zhihu, Toutiao, blogs, news), converts to Markdown, auto-tags by topic,
+  (blogs, news, forums), converts to Markdown, auto-tags by topic,
   archives to disk. After reading, summarizes key points and offers to save with
   proper categorization. Use when user sends a URL/link, mentions saving articles,
   wants to build a knowledge base, or asks about organizing web content.
@@ -40,7 +40,7 @@ User sends URL
 | Priority | Method | When |
 |:---------|:-------|:-----|
 | 1st | `web_extract(urls=[...], char_limit=10000)` | Open sites |
-| 2nd | Camofox → `browser_navigate` | Anti-scrape sites (WeChat, Zhihu) |
+| 2nd | Camofox → `browser_navigate` | Anti-scrape sites (browser fallback)
 | 3rd | `web_search` for reposted versions | When browser also fails |
 | 4th | dajiala.com paid API (¥0.03/article) | Last resort |
 
