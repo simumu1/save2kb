@@ -4,23 +4,23 @@
 
 **web-to-kb** (Web → Knowledge Base) is a universal skill that reads any web article, converts it to Markdown, saves it to a structured knowledge base, and auto-classifies it by topic.
 
-**✅ Effortlessly reads articles from any site — WeChat/Zhihu/Toutiao/Blog/News, just send the link.**
+**✅ Effortlessly reads articles from any site — various mainstream sites, just send the link.**
 
 ## 💰 Token Savings (Real Measured Data)
 
-Using one WeChat article as a benchmark:
+Using one restricted site article as a benchmark:
 
 | Method | Data Size | Est. Tokens | Ratio |
 |:-------|:----------|:------------|:-----:|
 | 🔴 Raw full-page HTML (JS/CSS/tracking) | 4,055,779 chars | Millions | 1,429x |
 | 🟢 **save2kb: compact snapshot → plain MD** | **2,838 chars** | **~2,000-4,000** | **1x** |
 
-**Source:** Same WeChat article, comparing `outerHTML.length` vs `innerText.length`.
+**Source:** Same restricted site article, comparing `outerHTML.length` vs `innerText.length`.
 **Result:** Saves approximately **99.93% of tokens**.
 
 ## Use Cases
 
-- User sends a WeChat/Zhihu/Medium/blog/news article link and says "save to knowledge base"
+- User sends a article link article link and says "save to knowledge base"
 - Periodically collect industry articles and archive them into a knowledge base
 - Generate weekly knowledge base digests
 

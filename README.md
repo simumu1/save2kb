@@ -6,10 +6,10 @@
 
 **Web article → Knowledge Base.** Read → Summarize → Save. Auto-classify, multi-language, token-efficient.
 
-**✅ 轻松读取各网站文章 — 公众号/知乎/头条/博客/新闻，你只管发链接。**
-**✅ Effortlessly reads articles from any site — WeChat/Zhihu/Toutiao/Blog/News, just send the link.**
+**✅ 轻松读取各网站文章 — 各主流网站，你只管发链接。**
+**✅ Effortlessly reads articles from any site — various mainstream sites, just send the link.**
 
-任意网页文章（公众号/知乎/头条/博客/新闻）→ 转 Markdown → 自动分类 → 存到结构化知识库。纯文字存档，省 token。
+任意网页文章（各主流网站）→ 转 Markdown → 自动分类 → 存到结构化知识库。纯文字存档，省 token。
 
 ---
 
@@ -28,7 +28,7 @@
 
 基于真实页面实测，分两种场景：
 
-### 场景 A：中国网站（公众号等）→ 浏览器 compact snapshot
+### 场景 A：国内部分网站→ 浏览器 compact snapshot
 
 通过 Camofox 浏览器真实加载页面后，用 compact snapshot 只提取纯文字，避开页面中的技术框架代码。
 
@@ -37,8 +37,8 @@
 | 🔴 浏览器完整页面源码 | **4,055,779 字符** | 数百万+ | **1,429x** |
 | 🟢 **save2kb（compact snapshot → 纯文字 MD）** | **2,838 字符** | **~2,000-4,000** | **1x** |
 
-> 📍 实测于 **微信公众号** 文章《每日SEO 198》，通过 DevTools 获取页面结构数据对比。
-> 一篇普通公众号文章即可节省 **99.93% token**。
+> 📍 实测于一篇国内网站文章《每日SEO 198》，通过 DevTools 获取页面结构数据对比。
+> 一篇文章即可节省 **99.93% token**。
 
 ### 场景 B：国际网站 → web_extract
 
@@ -56,7 +56,7 @@
 
 | 场景 | 节省幅度 | 原因 |
 |:----|:--------:|:-----|
-| 🏠 **国内网站**（公众号等） | **~99.9%** | 浏览器加载完整页面后，compact snapshot 只提取有效文字 |
+| 🏠 **国内网站** | **~99.9%** | 浏览器加载完整页面后，compact snapshot 只提取有效文字 |
 | 🌍 **国际网站**（博客/新闻/媒体） | **~40-60%** | web_extract 直接提取纯文字，跳过 HTML 结构标签 |
 | 📄 **技术文档类网站**（文档/手册） | **~20-40%** | 页面本身较精简，但去除导航和目录仍有节省 |
 
@@ -100,7 +100,7 @@ npx skills add https://github.com/simumu1/save2kb
 > **例 1：** `https://mp.weixin.qq.com/s/... 知识库`
 > 读完 → 直接存档（只问路径）
 >
-> **例 2：** `https://zhuanlan.zhihu.com/p/...`
+> **例 2：** `https://example.com/article/...`
 > 读完 → 问"要存知识库吗？"
 > 你回"好" → 存；你回"不用" → 结束
 
@@ -141,7 +141,7 @@ status: raw
 
 ## ⚙️ Dependencies / 依赖
 
-- **Camofox Browser** (optional) — for anti-scrape pages like WeChat. Auto-starts on `localhost:9377`
+- **Camofox Browser** (optional) — for anti-scrape pages. Auto-starts on `localhost:9377`
 - **web_extract** — built-in agent tool, preferred for token efficiency
 
 ## 🙏 Acknowledgments / 致谢
@@ -155,12 +155,12 @@ status: raw
 | 项目 / 开发者 | 贡献 |
 |:--------------|:-----|
 | [Nous Research](https://nousresearch.com) | Hermes Agent — 智能体框架 / the agent framework |
-| [jo-inc / Camofox Browser](https://github.com/jo-inc/camofox-browser) | 反检测浏览器，实现公众号文章读取 / anti-detection browser for WeChat |
+| [jo-inc / Camofox Browser](https://github.com/jo-inc/camofox-browser) | 反检测浏览器，实现受限页面读取 / anti-detection browser |
 | [kepano / obsidian-skills](https://github.com/kepano/obsidian-skills) | 技能结构参考 / skill structure reference |
 | [obra / superpowers](https://github.com/obra/superpowers) | AI 编程技能框架 / AI coding skill framework (233k ⭐) |
 | [jnMetaCode / superpowers-zh](https://github.com/jnMetaCode/superpowers-zh) | 中文技能文档范例 / Chinese skill documentation example |
 | [anysearch-ai / anysearch-skill](https://github.com/anysearch-ai/anysearch-skill) | 公开技能 README 规范参考 / public skill README template |
-| [极致了数据 dajiala.com](https://www.dajiala.com) | 微信公众号文章 API（备选方案）/ WeChat article API (fallback) |
+| [极致了数据 dajiala.com](https://www.dajiala.com) | 国内受限页面 API（备选方案）/ Restricted page API (fallback) |
 
 以及所有开源社区的贡献者。感谢你们的无私分享 🙌
 
