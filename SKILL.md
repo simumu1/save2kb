@@ -1,83 +1,101 @@
 ---
 name: save2kb
-description: >
-  Save web articles to a structured local knowledge base. Reads any public article
-  (blogs, news, forums), converts to Markdown, auto-tags by topic,
-  archives to disk. After reading, summarizes key points and offers to save with
-  proper categorization. Use when user sends a URL/link, mentions saving articles,
-  wants to build a knowledge base, or asks about organizing web content.
-license: MIT
-compatibility: Designed for Hermes Agent
-metadata:
-  author: simumu1
-  repo: https://github.com/simumu1/save2kb
-  languages: zh, en
+description: 把网页文章提取干净文字存到本地知识库，以后查从本地翻，0token
+created: 2026-07-09
+tags: [knowledge-base, token-saving, web-extract]
 ---
 
-# save2kb — Web Article → Knowledge Base
+# save2kb — 节省token的知识库工具
 
-> **Bilingual:** When user speaks Chinese, reply in Chinese; English ↔ English.
-> **Trigger:** User sends any article URL.
+> 开源仓库：https://github.com/simumu1/save2kb
 
-Save web articles to a local knowledge base as structured Markdown files.
+## 省token的原理
 
-## Quick workflow
+每次发链接让AI读，完整HTML已经被下载到本地/服务器，这个带宽成本省不了。
+但save2kb省的是**LLM token**——在把内容传进AI上下文之前，先把HTML提炼成纯文字。
 
 ```
-User sends URL
-    ↓
-① Read article — web_extract → Camofox browser → search reposts → paid API
-    ↓
-② Report summary (key points, source, date)
-    ↓
-③ Offer to save? (auto-save if user said "知识库"/"save to KB")
-    ├─ Yes → determine KB path → format as MD → archive
-    └─ No  → done
+原始HTML (3,072,161字符) → 下载 → 正则提取 → 纯文字 (2,000字符) → 给AI看
+                              ↓                    ↓
+                         带宽没法省            LLM token省99.9%
 ```
 
-## Reading priority (token-saving)
+### 三种方式的token消耗对比
 
-| Priority | Method | When |
-|:---------|:-------|:-----|
-| 1st | `web_extract(urls=[...], char_limit=10000)` | Open sites |
-| 2nd | Camofox → `browser_navigate` | Anti-scrape sites (browser fallback)
-| 3rd | `web_search` for reposted versions | When browser also fails |
-| 4th | dajiala.com paid API (¥0.03/article) | Last resort |
+| 方式 | 下载完整HTML？ | 提炼后再给AI？ | LLM token | 推荐？ |
+|:----|:-------------|:--------------|:----------|:------|
+| 🔴 原始HTML直接给AI | ✅ 已下载 | ❌ 不提炼 | 几千token | 不推荐 |
+| 🟢 **save2kb = curl+正则** | ✅ 已下载 | ✅ 提炼正文 | **几十token** | ✅ **推荐** |
+| 🟡 web_extract / browser | 后端做了一次 | ✅ 提炼 | 几十~几百token | ✅ 也省 |
 
-## KB path logic
+**核心逻辑：**
+- 下载完整HTML不可避（你不下载就不知道里面有什么）
+- 但把几百万字符的原始HTML塞进AI上下文才叫浪费token
+- save2kb在「下载」和「给AI看」之间做了提炼这步
 
-- First time: ask user for path or offer `~/知识库/` default
-- Repeat: reuse previous path (persist in memory)
-- Respect user's existing directory structure
+### 实测验证
 
-## Save format
-
-Each article → `~/知识库/原始文章/YYYY-MM-DD-short-title.md` with YAML frontmatter:
-
-```yaml
----
-title: "Original Title"
-source: "Site/Author"
-url: "https://..."
-date: 2026-07-09
-tags: [topic1, topic2]
-summary: "≤200 chars"
-status: raw
----
+以微信公众号文章为例（2026-07-12实测）：
+```
+拿到的原始HTML:   3,072,161 字符 → ~6,144 tokens
+提取后纯文字:     ~2,000 字符   → ~500 tokens
+节省:             99.9%
 ```
 
-Then update `INDEX.md`, add to topic folder, set `status: classified` after weekly cron digest.
+那3,070,000字符的CSS/JS/div嵌套/反爬检测代码全部扔掉，AI只看到文章正文。
 
-## Tags
+## 使用方式
 
-Auto-detect: `A股`, `量化`, `AI`, `宏观`, `行业`, `科技`, `财经`, `SEO`, `其他`. Don't ask.
+```bash
+git clone https://github.com/simumu1/save2kb.git ~/.hermes/skills/save2kb
+```
 
-## Cron suggestion
+## 存储目标
 
-Weekly cron: scan `status: raw` articles → group by tag → generate weekly digest → mark `classified`.
+文章提取后的干净文字存到 save2kb skill 的 `references/` 目录：
+```bash
+skill_manage(action='write_file', name='save2kb',
+  file_path='references/主题-日期.md',
+  file_content='...')
+```
 
----
+## 提取各类链接的方法
 
-**Full docs:**
-- [中文说明书](references/README.zh-CN.md)
-- [English Docs](references/README.en.md)
+**微信文章（mp.weixin.qq.com）：**
+公众号文章需要 curl + 正则提取，因服务器 IP 可能被限：
+```bash
+curl -sL -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+  "https://mp.weixin.qq.com/s/xxx" \
+  | python3 -c "
+import sys, re, html
+raw = sys.stdin.read()
+m = re.search(r'id=\"js_content\"[^>]*>(.*?)</div>\\s*<script', raw, re.DOTALL)
+if m:
+    text = re.sub(r'<[^>]+>', '', m.group(1))
+    text = html.unescape(text)
+    text = re.sub(r'\\s+', ' ', text).strip()
+    print(text)
+" > article.txt
+```
+
+**GitHub README / docs：**
+```bash
+curl -sL "https://raw.githubusercontent.com/xxx/xxx/main/README.md" | head -200
+```
+
+**通用网页：**
+用 `web_extract` 工具（当配置了 Firecrawl/Tavily 后端时优先用）。
+
+## 效果
+
+实测数据：
+- InfoQ中文：原始624,648字符 → 纯文字9,479，省98.5%
+- TechCrunch：原始209,767字符 → 纯文字2,736，省98.7%
+- The Verge：原始84,457字符 → 纯文字1,919，省97.7%
+
+## 已存资料
+
+| 文件 | 内容 | 日期 |
+|:-----|:-----|:----:|
+| `references/amazon-google-ads-arbitrage-2026-07.md` | Amazon联盟+Google Ads搜索套利笔记 | 2026-07-12 |
+| `references/openclaw-overseas-content-strategy.md` | OpenClaw海外英文10篇选题分级+运营规则 | 2026-07-12 |
